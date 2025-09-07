@@ -1,0 +1,202 @@
+ 👍 Task 4 is to build a Hotel Reservation System in Java.
+
+The requirements are:
+
+1) Search, book, and manage hotel rooms
+
+2) Room categorization (Standard, Deluxe, Suite, etc.)
+
+3) Make & cancel reservations
+
+4) Payment simulation + booking details
+
+5) Use OOP + database/file I/O
+
+
+
+✅ Step 1: Define Classes (OOP Design)
+
+We’ll need classes like:
+
+Room → stores room number, category, price, availability.
+
+Reservation → stores booking details (guest, room, dates, payment).
+
+Hotel → manages rooms, reservations, search, booking, cancellation.
+
+Main → user interaction (console or GUI).
+
+
+
+
+
+✅ Step 2: Console-Based Java Implementation (with File I/O)
+
+
+import java.io.*;
+import java.util.*;
+
+class Room {
+    int roomNumber;
+    String category;
+    double price;
+    boolean isBooked;
+
+    public Room(int roomNumber, String category, double price) {
+        this.roomNumber = roomNumber;
+        this.category = category;
+        this.price = price;
+        this.isBooked = false;
+    }
+}
+
+class Reservation {
+    String guestName;
+    Room room;
+    String checkInDate;
+    String checkOutDate;
+
+    public Reservation(String guestName, Room room, String checkInDate, String checkOutDate) {
+        this.guestName = guestName;
+        this.room = room;
+        this.checkInDate = checkInDate;
+        this.checkOutDate = checkOutDate;
+    }
+
+    @Override
+    public String toString() {
+        return "Guest: " + guestName + ", Room: " + room.roomNumber + " (" + room.category + "), "
+                + "Check-in: " + checkInDate + ", Check-out: " + checkOutDate + ", Price: $" + room.price;
+    }
+}
+
+class Hotel {
+    ArrayList<Room> rooms = new ArrayList<>();
+    ArrayList<Reservation> reservations = new ArrayList<>();
+
+    public Hotel() {
+        // Add some sample rooms
+        rooms.add(new Room(101, "Standard", 100));
+        rooms.add(new Room(102, "Deluxe", 200));
+        rooms.add(new Room(103, "Suite", 300));
+    }
+
+    public void showAvailableRooms() {
+        System.out.println("=== Available Rooms ===");
+        for (Room r : rooms) {
+            if (!r.isBooked) {
+                System.out.println("Room " + r.roomNumber + " - " + r.category + " - $" + r.price);
+            }
+        }
+    }
+
+    public void makeReservation(String guestName, int roomNumber, String checkIn, String checkOut) {
+        for (Room r : rooms) {
+            if (r.roomNumber == roomNumber && !r.isBooked) {
+                r.isBooked = true;
+                Reservation res = new Reservation(guestName, r, checkIn, checkOut);
+                reservations.add(res);
+                System.out.println("✅ Reservation successful!");
+                saveToFile(res);
+                return;
+            }
+        }
+        System.out.println("❌ Room not available!");
+    }
+
+    public void cancelReservation(String guestName) {
+        Iterator<Reservation> it = reservations.iterator();
+        while (it.hasNext()) {
+            Reservation res = it.next();
+            if (res.guestName.equalsIgnoreCase(guestName)) {
+                res.room.isBooked = false;
+                it.remove();
+                System.out.println("✅ Reservation cancelled for " + guestName);
+                return;
+            }
+        }
+        System.out.println("❌ No reservation found for " + guestName);
+    }
+
+    public void viewReservations() {
+        System.out.println("=== All Reservations ===");
+        for (Reservation r : reservations) {
+            System.out.println(r);
+        }
+    }
+
+    private void saveToFile(Reservation res) {
+        try (PrintWriter out = new PrintWriter(new FileWriter("reservations.txt", true))) {
+            out.println(res);
+        } catch (IOException e) {
+            System.out.println("Error saving reservation!");
+        }
+    }
+}
+
+public class HotelReservationSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Hotel hotel = new Hotel();
+
+        while (true) {
+            System.out.println("\n===== Hotel Reservation System =====");
+            System.out.println("1. View Available Rooms");
+            System.out.println("2. Make Reservation");
+            System.out.println("3. Cancel Reservation");
+            System.out.println("4. View Reservations");
+            System.out.println("5. Exit");
+            System.out.print("Choose option: ");
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1:
+                    hotel.showAvailableRooms();
+                    break;
+                case 2:
+                    System.out.print("Enter your name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Enter room number: ");
+                    int roomNum = sc.nextInt();
+                    sc.nextLine();
+                    System.out.print("Enter check-in date: ");
+                    String in = sc.nextLine();
+                    System.out.print("Enter check-out date: ");
+                    String out = sc.nextLine();
+                    hotel.makeReservation(name, roomNum, in, out);
+                    break;
+                case 3:
+                    System.out.print("Enter your name to cancel: ");
+                    String guest = sc.nextLine();
+                    hotel.cancelReservation(guest);
+                    break;
+                case 4:
+                    hotel.viewReservations();
+                    break;
+                case 5:
+                    System.out.println("Goodbye!");
+                    sc.close();
+                    return;
+                default:
+                    System.out.println("Invalid option!");
+            }
+        }
+    }
+}
+
+
+** Features Implemented
+
+Search available rooms
+
+Book a room with guest details
+
+Cancel reservation by name
+
+View all reservations
+
+Save reservations to a file (reservations.txt)
+
+
+
